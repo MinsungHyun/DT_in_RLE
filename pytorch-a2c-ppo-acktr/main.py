@@ -21,6 +21,8 @@ from visualize import visdom_plot
 
 import algo
 
+from PIL import Image
+
 args = get_args()
 
 assert args.algo in ['a2c', 'ppo', 'acktr']
@@ -126,10 +128,17 @@ def main():
                         rollouts.masks[step])
             cpu_actions = action.squeeze(1).cpu().numpy()
 
-            # Obser reward and next obs
+            # Observe reward and next obs
             obs, reward, done, info = envs.step(cpu_actions)
-            reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
-            episode_rewards += reward
+
+            # sample images
+            # img = np.squeeze(np.transpose(obs[3], (1, 2, 0)), 2)
+            # img = Image.fromarray(img, 'L')
+            # img.save('./imgs/env_sample.png')
+            # img.show()
+            #
+            # reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
+            # episode_rewards += reward
 
             # If done then clean the history of observations.
             masks = torch.FloatTensor([[0.0] if done_ else [1.0] for done_ in done])

@@ -82,3 +82,13 @@ class WrapPyTorch(gym.ObservationWrapper):
 
     def observation(self, observation):
         return observation.transpose(2, 0, 1)
+
+class UnwrappedObs(gym.ObservationWrapper):
+    def __init__(self, env=None):
+        super(UnwrappedObs, self).__init__(env)
+
+    def step(self, action):
+        obs, reward, done, info = self.env.step(action)
+        wr_obs, wr_reward, _, _ = self.env.unwrapped.step(action)
+
+        return obs, reward, done, info, wr_obs, wr_reward
