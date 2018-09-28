@@ -10,7 +10,7 @@ import example_pb2
 from meta import Meta
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--data_dir', default='/home/mipal/dataset/svhn', help='directory to SVHN (format 1) folders and write the converted files')
+parser.add_argument('-d', '--data_dir', default='./data', help='directory to SVHN (format 1) folders and write the converted files')
 
 
 class ExampleReader(object):
@@ -41,7 +41,7 @@ class ExampleReader(object):
                                                                     int(round(bbox_width * 1.3)),
                                                                     int(round(bbox_height * 1.3)))
         image = image.crop([cropped_left, cropped_top, cropped_left + cropped_width, cropped_top + cropped_height])
-        # image = image.resize([64, 64])
+        image = image.resize([64, 64])
         return image
 
     def read_and_convert(self, digit_struct_mat_file):
@@ -57,11 +57,13 @@ class ExampleReader(object):
         attrs = ExampleReader._get_attrs(digit_struct_mat_file, index)
         label_of_digits = attrs['label']
         length = len(label_of_digits)
-        if length > 5:
+        # if length > 5:
+        if length > 10:
             # skip this example
             return self.read_and_convert(digit_struct_mat_file)
 
-        digits = [10, 10, 10, 10, 10]   # digit 10 represents no digit
+        # digits = [10, 10, 10, 10, 10]   # digit 10 represents no digit
+        digits = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10]  # digit 10 represents no digit
         for idx, label_of_digit in enumerate(label_of_digits):
             digits[idx] = int(label_of_digit if label_of_digit != 10 else 0)    # label 10 is essentially digit zero
 
