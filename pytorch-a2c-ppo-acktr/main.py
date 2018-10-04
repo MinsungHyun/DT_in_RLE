@@ -22,6 +22,8 @@ from visualize import visdom_plot
 import algo
 
 from PIL import Image
+from utils import digit_eval
+from utils import convert_to_lmdb
 
 args = get_args()
 
@@ -118,6 +120,11 @@ def main():
         rollouts.cuda()
 
     start = time.time()
+
+    lmdb_idx = 0
+    os.makedirs(os.path.join(args.lmdb_path, args.env_name), exist_ok=True)
+    os.makedirs(os.path.join(args.lmdb_path, args.env_name, 'test'), exist_ok=True)
+
     for j in range(num_updates):
         for step in range(args.num_steps):
             # Sample actions
@@ -129,16 +136,25 @@ def main():
             cpu_actions = action.squeeze(1).cpu().numpy()
 
             # Observe reward and next obs
-            obs, reward, done, info = envs.step(cpu_actions)
-
+            # obs, reward, done, info = envs.step(cpu_actions)
+            '''unwrapped obs, reward'''
+            obs, reward, done, info, wr_obs, wr_reward = envs.step(cpu_actions)
             # sample images
             # img = np.squeeze(np.transpose(obs[3], (1, 2, 0)), 2)
-            # img = Image.fromarray(img, 'L')
-            # img.save('./imgs/env_sample.png')
+            for img, rwd in zip(wr_obs, wr_reward):
+                if rwd > 0:
+                    lmdb_idx += 1
+                    convert_to_lmdb(img, rwd, os.path.join(args.lmdb_path, args.env_name), lmdb_idx)
+
+            # Evaluate unwrapped rewards
+            # model = Model()
+            # model.load(args.digit_checkpoint)
+            # model.cuda()
+            # accuracy = digit_eval(image, length_labels, digits_labels, model)
             # img.show()
-            #
-            # reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
-            # episode_rewards += reward
+
+            reward = torch.from_numpy(np.expand_dims(np.stack(reward), 1)).float()
+            episode_rewards += reward
 
             # If done then clean the history of observations.
             masks = torch.FloatTensor([[0.0] if done_ else [1.0] for done_ in done])

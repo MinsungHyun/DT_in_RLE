@@ -1,2 +1,6 @@
 
 crnn\.pytorch/expr/
+
+pytorch-a2c-ppo-acktr/data/
+
+pytorch-a2c-ppo-acktr/log/

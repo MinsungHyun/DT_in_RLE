@@ -52,6 +52,9 @@ def make_env(env_id, seed, rank, log_dir, add_timestep):
         if len(obs_shape) == 3 and obs_shape[2] in [1, 3]:
             env = WrapPyTorch(env)
 
+        # get unwrapped obs, reward
+        env = UnwrappedObs(env)
+
         return env
 
     return _thunk
@@ -83,6 +86,7 @@ class WrapPyTorch(gym.ObservationWrapper):
     def observation(self, observation):
         return observation.transpose(2, 0, 1)
 
+
 class UnwrappedObs(gym.ObservationWrapper):
     def __init__(self, env=None):
         super(UnwrappedObs, self).__init__(env)
@@ -92,3 +96,6 @@ class UnwrappedObs(gym.ObservationWrapper):
         wr_obs, wr_reward, _, _ = self.env.unwrapped.step(action)
 
         return obs, reward, done, info, wr_obs, wr_reward
+
+    def observation(self, observation):
+        return observation
